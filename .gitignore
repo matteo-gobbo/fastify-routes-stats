@@ -145,9 +145,6 @@ yarn.lock
 .vscode
 .idea
 
-#tap files
-.tap/
-
 *clinic-doctor*
 *flamegraph*
 *0x*
