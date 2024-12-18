@@ -1,6 +1,6 @@
 'use strict'
 
-const { beforeEach, test } = require('tap')
+const { beforeEach, test } = require('node:test')
 const { performance } = require('node:perf_hooks')
 const { Transform } = require('node:stream')
 const Fastify = require('fastify')
@@ -16,7 +16,7 @@ test('produces some stats', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/', async () => {
     return { hello: 'world' }
@@ -29,15 +29,15 @@ test('produces some stats', async (t) => {
   await setTimeoutPromise(10)
   const measurements = fastify.measurements()
   const nums = measurements.GET['/']
-  t.ok(nums[0] >= 0)
-  t.ok(nums.length === 1)
+  t.assert.ok(nums[0] >= 0)
+  t.assert.ok(nums.length === 1)
 })
 
 test('has no conflicts with custom measures', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/', async () => {
     performance.mark('A')
@@ -54,15 +54,15 @@ test('has no conflicts with custom measures', async (t) => {
   await setTimeoutPromise(10)
   const measurements = fastify.measurements()
   const nums = measurements.GET['/']
-  t.ok(nums[0] >= 0)
-  t.ok(nums.length === 1)
+  t.assert.ok(nums[0] >= 0)
+  t.assert.ok(nums.length === 1)
 })
 
 test('measurements returns an array', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.after() })
 
   fastify.get('/', async () => {
     return { hello: 'world' }
@@ -83,17 +83,17 @@ test('measurements returns an array', async (t) => {
   await setTimeoutPromise(10)
   const measurements = fastify.measurements()
   const nums = measurements.GET['/']
-  t.ok(nums.length === 3)
-  t.ok(nums[0] >= 0)
-  t.ok(nums[1] >= 0)
-  t.ok(nums[2] >= 0)
+  t.assert.ok(nums.length === 3)
+  t.assert.ok(nums[0] >= 0)
+  t.assert.ok(nums[1] >= 0)
+  t.assert.ok(nums[2] >= 0)
 })
 
 test('creates stats', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/', async () => {
     return { hello: 'world' }
@@ -114,19 +114,19 @@ test('creates stats', async (t) => {
   await setTimeoutPromise(10)
   const stats = fastify.stats()
   const nums = stats.GET['/']
-  t.ok(nums.mean >= 0)
-  t.ok(nums.mode >= 0)
-  t.ok(nums.median >= 0)
-  t.ok(nums.max >= 0)
-  t.ok(nums.min >= 0)
-  t.ok(nums.sd >= 0)
+  t.assert.ok(nums.mean >= 0)
+  t.assert.ok(nums.mode >= 0)
+  t.assert.ok(nums.median >= 0)
+  t.assert.ok(nums.max >= 0)
+  t.assert.ok(nums.min >= 0)
+  t.assert.ok(nums.sd >= 0)
 })
 
 test('group stats together', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/:param/grouped-stats', { config: { statsId: 'grouped-stats' } }, async () => {
     return { hello: 'world' }
@@ -147,21 +147,21 @@ test('group stats together', async (t) => {
   await setTimeoutPromise(10)
   const stats = fastify.stats()
   const nums = stats.GET['grouped-stats']
-  t.ok(Object.keys(stats).length === 1)
-  t.ok(nums)
-  t.ok(nums.mean >= 0)
-  t.ok(nums.mode >= 0)
-  t.ok(nums.median >= 0)
-  t.ok(nums.max >= 0)
-  t.ok(nums.min >= 0)
-  t.ok(nums.sd >= 0)
+  t.assert.ok(Object.keys(stats).length === 1)
+  t.assert.ok(nums)
+  t.assert.ok(nums.mean >= 0)
+  t.assert.ok(nums.mode >= 0)
+  t.assert.ok(nums.median >= 0)
+  t.assert.ok(nums.max >= 0)
+  t.assert.ok(nums.min >= 0)
+  t.assert.ok(nums.sd >= 0)
 })
 
 test('produces stats for multiple methods', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/', async () => {
     return { hello: 'world', method: 'GET' }
@@ -183,19 +183,19 @@ test('produces stats for multiple methods', async (t) => {
   await setTimeoutPromise(10)
   const measurements = fastify.measurements()
   const gets = measurements.GET['/']
-  t.ok(gets[0] >= 0)
-  t.ok(gets.length === 1)
+  t.assert.ok(gets[0] >= 0)
+  t.assert.ok(gets.length === 1)
 
   const posts = measurements.POST['/']
-  t.ok(posts[0] >= 0)
-  t.ok(posts.length === 1)
+  t.assert.ok(posts[0] >= 0)
+  t.assert.ok(posts.length === 1)
 })
 
 test('produces stats for multiple routes of method', async (t) => {
   const fastify = Fastify()
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/first', async () => {
     return { hello: 'world' }
@@ -224,12 +224,12 @@ test('produces stats for multiple routes of method', async (t) => {
   await setTimeoutPromise(10)
   const stats = fastify.stats()
   Object.values(stats.GET).forEach(nums => {
-    t.ok(nums.mean >= 0)
-    t.ok(nums.mode >= 0)
-    t.ok(nums.median >= 0)
-    t.ok(nums.max >= 0)
-    t.ok(nums.min >= 0)
-    t.ok(nums.sd >= 0)
+    t.assert.ok(nums.mean >= 0)
+    t.assert.ok(nums.mode >= 0)
+    t.assert.ok(nums.median >= 0)
+    t.assert.ok(nums.max >= 0)
+    t.assert.ok(nums.min >= 0)
+    t.assert.ok(nums.sd >= 0)
   })
 })
 
@@ -242,7 +242,7 @@ test('logs stats every printInterval sec', async (t) => {
   const fastify = Fastify({ logger: { stream, level: 'info' } })
   fastify.register(Stats, { printInterval: 500 })
 
-  t.teardown(() => {
+  t.after(() => {
     clock.uninstall()
     fastify.close()
   })
@@ -259,7 +259,7 @@ test('logs stats every printInterval sec', async (t) => {
 
   let i = 0
   stream.on('data', line => {
-    t.match(line, matches[i], `Line ${i}`)
+    t.assert.match(line.msg, matches[i].msg, `Line ${i}`)
     i += 1
   })
 
@@ -288,11 +288,11 @@ test('reply sent in a onRequest hook before stats registered', async (t) => {
   const match = { msg: /missing request mark/ }
 
   stream.on('data', line => {
-    t.match(line, match, 'Line matched')
+    t.assert.match(line.msg, match.msg, 'Line matched')
   })
   fastify.register(Stats)
 
-  t.teardown(fastify.close.bind(fastify))
+  t.after(() => { fastify.close() })
 
   fastify.get('/', async () => {
     return { hello: 'world' }
